@@ -303,7 +303,7 @@ class BTBEntry
 			return hRegisterWithShare;
 		}
 
-		// Relevant to LShare/GShare - building pc mask to do XOR
+		// Relevant too LShare/GSharee - building pc mask to do XOR
 		// with history value.
 		uint32_t GetPCMaskWithShare(uint32_t pc, bool isShareLsb)
 		{
