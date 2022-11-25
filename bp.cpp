@@ -333,6 +333,10 @@ class BTBEntry
 		{
 
 		}
+
+		void Print(){
+			cout << "Debug: " << this->_tag << " target:" << this->_targetPc << endl;
+		}
 };
 
 unsigned BTBEntry::_historySize;
@@ -519,6 +523,11 @@ class BranchPredictor
 
 			return alignedTargetPC;
 		}
+		void Print(){
+			for(int i = 0; i < this->_btbEntries.size(); i++){
+				this->_btbEntries[i].Print();
+			}
+		}
 };
 
 unsigned BranchPredictor::_btbSize;
@@ -542,6 +551,7 @@ int BP_init(unsigned btbSize, unsigned historySize, unsigned tagSize, unsigned f
 }
 
 bool BP_predict(uint32_t pc, uint32_t* dst) {
+	bp->Print();
 	return bp->Predict(pc, dst);
 }
 
