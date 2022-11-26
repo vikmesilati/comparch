@@ -145,14 +145,10 @@ class BTBEntry
 		{
 			_isInValidEntry = true;
 		}
-		// ~BTBEntry(){
-		// 	for(int i = 0; i < _lCounterArray.size(); i++){
-		// 		delete &_lCounterArray[i];
-		// 	}
-		// 	for(int i = 0; i < _gCounterArray.size(); i++){
-		// 		delete &_gCounterArray[i];
-		// 	}
-		// }
+		~BTBEntry(){
+			_lCounterArray.clear();
+			_gCounterArray.clear();
+		}
 		BTBEntry(uint32_t tag, uint32_t targetPc, bool isTaken)
 		{
 			_isInValidEntry = false;
