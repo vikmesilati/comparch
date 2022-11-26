@@ -140,14 +140,13 @@ class BTBEntry
 		static int _shared;
 
 	public:
-		// Dummy constructor
+		// Dummy constructor.
 		BTBEntry() 
 		{
 			_isInValidEntry = true;
 		}
 		~BTBEntry(){
-			_lCounterArray.clear();
-			_gCounterArray.clear();
+			// add delete function
 		}
 		BTBEntry(uint32_t tag, uint32_t targetPc, bool isTaken)
 		{
