@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
 	}
 
 	// For debugging without cmd - remove later.
-	argv[1] = "example1.trc";
+	argv[1] = "example3.trc";
 	// 
 
 	FILE* trace = fopen(argv[1], "r");
