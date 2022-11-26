@@ -145,7 +145,14 @@ class BTBEntry
 		{
 			_isInValidEntry = true;
 		}
-
+		// ~BTBEntry(){
+		// 	for(int i = 0; i < _lCounterArray.size(); i++){
+		// 		delete &_lCounterArray[i];
+		// 	}
+		// 	for(int i = 0; i < _gCounterArray.size(); i++){
+		// 		delete &_gCounterArray[i];
+		// 	}
+		// }
 		BTBEntry(uint32_t tag, uint32_t targetPc, bool isTaken)
 		{
 			_isInValidEntry = false;
@@ -369,7 +376,10 @@ class BranchPredictor
 		{
 			_btbEntries.resize(btbSize);
 		}
-
+		~BranchPredictor(){
+			vector<BTBEntry>().swap(_btbEntries);
+			_btbEntries.clear();
+		}
 		int Init(unsigned btbSize, unsigned historySize, unsigned tagSize, unsigned fsmState,
 			bool isGlobalHist, bool isGlobalTable, int shared)
 		{
@@ -570,8 +580,7 @@ void BP_GetStats(SIM_stats* curStats) {
 
 	// Releasing dynamic allocations.
 	delete GlobalStats;
-
 	// Release bp and entries.
-
+	delete bp;
 	return;
 }
