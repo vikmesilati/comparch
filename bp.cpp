@@ -136,8 +136,6 @@ class BTBEntry
 
 		static unsigned _historySize;
 		static unsigned _fsmState;
-		//static bool _isGlobalHist;
-		//static bool _isGlobalTable;
 		static PredictorMode _predictorMode;
 		static int _shared;
 
@@ -157,37 +155,51 @@ class BTBEntry
 			_targetPc = targetPc;
 			_isTaken = isTaken;
 
+			// If the entery isn't in the BTB, 
+			// the predicition is NT.
+			if (isTaken == true)
+			{
+				GlobalStats->flush_num++;
+			}
+
 			switch (_predictorMode)
 			{
 				case local_table_local_history:
-				case local_table_global_history:
-					//GlobalStats->size = (1 + BranchPredictor::TagSize);
 					_lCounterArray.resize(pow(2, _historySize));
-					InitLocalFSMs(isTaken);
+					InitLocalFSMs();
+					_lCounterArray[_bhr].SetNextCounterState(isTaken);
+					UpdateHistory(_bhr, isTaken);
+					break;
+				case local_table_global_history:
+					_lCounterArray.resize(pow(2, _historySize));
+					InitLocalFSMs();
+					_lCounterArray[_ghr].SetNextCounterState(isTaken);
+					UpdateHistory(_ghr, isTaken);
 					break;
 				case global_table_local_history:
+					_gCounterArray[_bhr].SetNextCounterState(isTaken);
+					UpdateHistory(_bhr, isTaken);
+					break;
 				case global_table_global_history:
-					_gCounterArray.resize(pow(2, _historySize));
-					InitGlobalFSMs(isTaken);
+					_gCounterArray[_ghr].SetNextCounterState(isTaken);
+					UpdateHistory(_ghr, isTaken);
 					break;
 			}
 		}
 
-		void InitLocalFSMs(bool isTaken)
+		void InitLocalFSMs()
 		{
 			for (int i = 0; i < _lCounterArray.size(); i++)
 			{
 				_lCounterArray[i] = BimodalCounter((CounterState)_fsmState);
-				_lCounterArray[i].SetNextCounterState(isTaken);
 			}
 		}
 
-		void InitGlobalFSMs(bool isTaken)
+		static void InitGlobalFSMs()
 		{
 			for (int i = 0; i < _gCounterArray.size(); i++)
 			{
 				_gCounterArray[i] = BimodalCounter((CounterState)_fsmState);
-				_gCounterArray[i].SetNextCounterState(isTaken);
 			}
 		}
 
@@ -198,6 +210,12 @@ class BTBEntry
 			_fsmState = fsmState;
 			_predictorMode = predictMode;
 			_shared = shared;
+
+			if (isGlobalTable)
+			{
+				_gCounterArray.resize(pow(2, historySize));
+				InitGlobalFSMs();
+			}
 		}
 
 		bool IsInValidEntry()
@@ -303,7 +321,7 @@ class BTBEntry
 			return hRegisterWithShare;
 		}
 
-		// Relevant too LShare/GSharee - building pc mask to do XOR
+		// Relevant to LShare/GShare - building pc mask to do XOR
 		// with history value.
 		uint32_t GetPCMaskWithShare(uint32_t pc, bool isShareLsb)
 		{
@@ -326,12 +344,7 @@ class BTBEntry
 		{
 			unsigned newBit = taken ? 1 : 0;
 			unsigned historyModulo = pow(2, _historySize);
-			historyRegister = ((historyRegister << newBit) | 1) % historyModulo;
-		}
-
-		void ClacTheoreticalPredictorSize()
-		{
-
+			historyRegister = ((historyRegister << 1) | newBit) % historyModulo;
 		}
 };
 
@@ -487,7 +500,7 @@ class BranchPredictor
 				pcMask = (pcMask << 1) | 1;
 			}
 
-			uint32_t btbEntryIndex = (pc >> numOfBitsShiftRight) & pcMask;
+			uint32_t btbEntryIndex = ((pc >> numOfBitsShiftRight) & pcMask) % _btbSize;
 
 			return btbEntryIndex;
 		}
@@ -554,7 +567,11 @@ void BP_GetStats(SIM_stats* curStats) {
 	curStats->br_num = GlobalStats->br_num;
 	curStats->flush_num = GlobalStats->flush_num;
 	curStats->size = GlobalStats->size;
+
+	// Releasing dynamic allocations.
 	delete GlobalStats;
-	delete bp;
+
+	// Release bp and entries.
+
 	return;
 }
