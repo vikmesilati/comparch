@@ -140,7 +140,7 @@ class BTBEntry
 		static int _shared;
 
 	public:
-		// Dummy constructor.
+		// Dummy constructor
 		BTBEntry() 
 		{
 			_isInValidEntry = true;
